@@ -489,10 +489,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const centerX = width / 2, centerY = height / 2;
             ctx.clearRect(0, 0, width, height);
 
-            targetConfigs.forEach(config => {
+            const maxRadius = (Math.min(width, height) / 2) - 15;
+
+            targetConfigs.forEach((config, index) => {
                 const ai = document.getElementById(config.angleId);
                 const ri = document.getElementById(config.rangeId);
                 if (!ai || !ri) return;
+
+                // Parse Angle
                 let ang = parseFloat(ai.value);
                 if (isNaN(ang)) {
                     const m = ai.value.match(/\d+/);
@@ -500,36 +504,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (isNaN(ang)) return;
 
-                // Adjust radius for the smaller mobile canvas if needed
-                // But current setup uses same width for desktop, smaller height for mobile?
-                // Actually mobile canvas is 300x160.
-                const radius = (Math.min(width, height) / 2) - 10;
+                // Parse Range for Scaling (0 - 1000 yds)
+                let rangeVal = 0;
+                const rangeMatch = ri.value.match(/\d+/);
+                if (rangeMatch) rangeVal = parseFloat(rangeMatch[0]);
+
+                // Calculate Radius based on range (Min 15% for visibility, Max 100%)
+                const scaleFactor = Math.min(Math.max(rangeVal / 1000, 0.15), 1.0);
+                const currentRadius = maxRadius * scaleFactor;
 
                 const rads = (ang - 90) * (Math.PI / 180);
-                const ex = centerX + radius * Math.cos(rads);
-                const ey = centerY + radius * Math.sin(rads);
+                const ex = centerX + currentRadius * Math.cos(rads);
+                const ey = centerY + currentRadius * Math.sin(rads);
 
-                ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
-                ctx.moveTo(centerX, centerY); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]);
+                // Draw Dotted Line
+                ctx.beginPath();
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = '#888';
+                ctx.lineWidth = 1;
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(ex, ey);
+                ctx.stroke();
+                ctx.setLineDash([]);
 
-                const xs = 8; ctx.lineWidth = 3;
+                // Draw X Marker
+                const xs = 5;
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#000';
                 ctx.beginPath();
                 ctx.moveTo(ex - xs, ey - xs); ctx.lineTo(ex + xs, ey + xs);
                 ctx.moveTo(ex + xs, ey - xs); ctx.lineTo(ex - xs, ey + xs);
                 ctx.stroke();
 
+                // Draw Label
                 const txt = ri.value;
                 if (txt) {
-                    ctx.font = 'bold 12px Inter, sans-serif'; ctx.fillStyle = '#1e3a8a';
+                    ctx.font = 'bold 8px Inter, sans-serif';
                     ctx.textBaseline = 'middle';
-                    // Smart position: if too far right, show text on the left of the marker
-                    if (ex > width * 0.7) {
-                        ctx.textAlign = 'right';
-                        ctx.fillText(txt, ex - 12, ey);
-                    } else {
-                        ctx.textAlign = 'left';
-                        ctx.fillText(txt, ex + 12, ey);
-                    }
+
+                    // User Request: Alternate sides (T1 left, T2 right, T3 left)
+                    let textAlign = (index === 1) ? 'left' : 'right';
+                    let labelX = (index === 1) ? ex + 10 : ex - 10;
+                    let labelY = ey;
+
+                    // Small vertical stagger to prevent overlap if angles are identical
+                    if (index === 0) labelY -= 8;
+                    if (index === 2) labelY += 8;
+
+                    // Measure text to draw a small background for legibility
+                    const metrics = ctx.measureText(txt);
+                    const padding = 2;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+
+                    let bgX = labelX;
+                    if (textAlign === 'right') bgX -= metrics.width;
+                    if (textAlign === 'center') bgX -= metrics.width / 2;
+
+                    ctx.fillRect(bgX - padding, labelY - 5, metrics.width + (padding * 2), 10);
+
+                    // Draw the text
+                    ctx.textAlign = textAlign;
+                    ctx.fillStyle = '#1e3a8a';
+                    ctx.fillText(txt, labelX, labelY);
                 }
             });
         });

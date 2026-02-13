@@ -1,4 +1,4 @@
-const CACHE_NAME = 'range-card-v27-form-organize';
+const CACHE_NAME = 'range-card-v36-restore-environment';
 const ASSETS = [
     './',
     './index.html',
