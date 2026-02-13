@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Core inputs that exist in the static HTML
     const inputs = [
-        'header-notes', 'date', 'time', 'caliber', 'zero', 'barrel', 'bullet', 'load', 'powder',
-        'primer', 'col', 'velocity', 'g1', 'weather', 'targetSize', 'groupSize', 'elevation', 'hold-data', 'final-dope',
+        'header-notes', 'shooter-name', 'date', 'time', 'caliber', 'zero', 'barrel', 'bullet', 'load', 'powder',
+        'primer', 'col', 'rings', 'velocity', 'g1', 'weather', 'targetSize', 'groupSize', 'elevation', 'hold-data', 'final-dope',
         'rifle-notes', 'wind-notes', 'scope-notes', 'shooting-angle', 'direction-notes', 'lrf-notes', 'compass-range',
         'shooting-angle-2', 'compass-range-2', 'shooting-angle-3', 'compass-range-3'
     ];
@@ -290,8 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('prevPowder').textContent = data.powder || '--';
         document.getElementById('prevLoad').textContent = data.load || '--';
         document.getElementById('prevCOL').textContent = data.col || '--';
+        document.getElementById('prevRings').textContent = data.rings || '--';
         document.getElementById('prevG1').textContent = data.g1 || '--';
         document.getElementById('prevHeaderNotes').textContent = data['header-notes'] || '--';
+        document.getElementById('prevShooter').textContent = data['shooter-name'] || '--';
         document.getElementById('prevTime').textContent = data.time || '--';
         document.getElementById('prevElev').textContent = data.elevation || '--';
         document.getElementById('prevHold').textContent = data['hold-data'] || '--';

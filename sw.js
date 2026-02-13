@@ -1,4 +1,4 @@
-const CACHE_NAME = 'range-card-v23-dope-icon';
+const CACHE_NAME = 'range-card-v27-form-organize';
 const ASSETS = [
     './',
     './index.html',

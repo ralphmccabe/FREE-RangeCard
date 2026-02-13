@@ -111,7 +111,8 @@
                 <h1
                     class="text-2xl font-bold tracking-tighter text-neon-green uppercase flex items-center gap-2 relative">
                     <i data-lucide="crosshair" class="w-6 h-6 text-neon-green"></i>
-                    <span class="text-neon-green">Range Data</span>
+                    <span class="text-neon-green">Range Data <span
+                            class="text-gray-500 font-normal text-xs lowercase italic">/ Free version</span></span>
                 </h1>
                 <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest flex justify-between items-center">
                     <span>Ballistics & Environment Log</span>
@@ -153,9 +154,9 @@
                 <select id="profileSelect" class="hidden"></select>
                 <button id="deleteProfileBtn" class="hidden"></button>
 
-                <!-- Reload Data Form -->
+                <!-- Session Info Form -->
                 <section class="space-y-4">
-                    <label class="section-label">Reload Data</label>
+                    <label class="section-label">Session Info</label>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-2"><input type="text" id="header-notes" class="input-field"
                                 placeholder="Header Notes"></div>
@@ -165,8 +166,11 @@
                         </div>
                         <div class="col-span-1"><input type="time" id="time" class="input-field" placeholder="Time">
                         </div>
-                        <!-- ... skipping middle lines to target next chunk ... -->
-                        <!-- Wait, I cannot skip comfortably in one replace call if lines depend on context. I'll split into 2 replacements for safety if needed, but here the input is far from the preview card. I should use MultiReplace or 2 calls. I will use MultiReplace. -->
+                    </div>
+
+                    <label class="section-label">Reload Data</label>
+
+                    <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-1"><input type="text" id="caliber" class="input-field"
                                 placeholder="Caliber"></div>
                         <div class="col-span-1"><input type="text" id="zero" class="input-field" placeholder="Zero">
@@ -182,6 +186,9 @@
                         <div class="col-span-1"><input type="text" id="primer" class="input-field" placeholder="Primer">
                         </div>
                         <div class="col-span-1"><input type="text" id="col" class="input-field" placeholder="C.O.L">
+                        </div>
+                        <div class="col-span-1"><input type="text" id="rings" class="input-field border-orange-500/30"
+                                placeholder="Rings">
                         </div>
                         <div class="col-span-1"><input type="text" id="velocity" class="input-field"
                                 placeholder="Velocity"></div>
@@ -217,6 +224,8 @@
                         <div class="col-span-1"><input type="text" id="direction-notes" class="input-field"
                                 placeholder="Direction / LOS"></div>
                     </div>
+
+                    <label class="section-label">Compass / Map</label>
 
                     <div class="space-y-2">
                         <div class="grid grid-cols-2 gap-2">
@@ -437,9 +446,12 @@
                                     BC</span><span id="mobile-display-g1" class="text-blue-800 font-normal"></span>
                             </div>
 
-                            <div class="flex flex-col col-span-3"><span
+                            <div class="flex flex-col col-span-2"><span
                                     class="text-[8px] text-gray-500 uppercase">Environment</span><span
                                     id="mobile-display-weather" class="text-blue-800 font-normal"></span></div>
+                            <div class="flex flex-col col-span-1"><span
+                                    class="text-[8px] text-gray-500 uppercase">Rings</span><span
+                                    id="mobile-display-rings" class="text-blue-800 font-normal"></span></div>
                             <div class="flex flex-col col-span-3"><span
                                     class="text-[8px] text-gray-500 uppercase">Group</span><span
                                     id="mobile-display-groupSize" class="text-blue-800 font-normal"></span></div>
@@ -639,6 +651,8 @@
                             <div class="flex flex-col col-span-2"><span
                                     class="text-[8px] text-gray-500 uppercase">Environment</span><span
                                     id="display-weather" class="text-blue-800 font-normal"></span></div>
+                            <div class="flex flex-col"><span class="text-[8px] text-gray-500 uppercase">Rings
+                                </span><span id="display-rings" class="text-blue-800 font-normal"></span></div>
                             <div class="flex flex-col"><span
                                     class="text-[8px] text-gray-500 uppercase">Group</span><span id="display-groupSize"
                                     class="text-blue-800 font-normal"></span>
@@ -858,11 +872,23 @@
                                 class="absolute inset-0 overflow-y-auto custom-scrollbar hidden p-10 bg-gray-900">
                                 <div class="max-w-3xl mx-auto space-y-10">
                                     <div class="border-b border-gray-800 pb-2">
-                                        <label class="text-[10px] text-neon-green font-bold uppercase mb-2 block">Header
-                                            Information</p>
-                                            <p id="prevHeaderNotes"
-                                                class="text-sm text-gray-300 italic leading-relaxed">---
-                                            </p>
+                                        <div class="flex justify-between items-end">
+                                            <div class="flex-1">
+                                                <label
+                                                    class="text-[10px] text-neon-green font-bold uppercase mb-2 block">Header
+                                                    Information</label>
+                                                <p id="prevHeaderNotes"
+                                                    class="text-sm text-gray-300 italic leading-relaxed">---</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <label
+                                                    class="text-[9px] text-gray-500 font-bold uppercase block">Shooter /
+                                                    Company</label>
+                                                <p id="prevShooter"
+                                                    class="text-xs text-white font-bold uppercase tracking-wider">---
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="grid grid-cols-3 gap-8">
@@ -930,8 +956,11 @@
                                                     <div class="flex justify-between border-b border-gray-800/30">
                                                         <span>C.O.L:</span> <span id="prevCOL">---</span>
                                                     </div>
-                                                    <div class="flex justify-between"><span>G1
-                                                            BC:</span> <span id="prevG1">---</span>
+                                                    <div class="flex justify-between border-b border-gray-800/30">
+                                                        <span>Rings:</span> <span id="prevRings">---</span>
+                                                    </div>
+                                                    <div class="flex justify-between border-b border-gray-800/30">
+                                                        <span>G1 BC:</span> <span id="prevG1">---</span>
                                                     </div>
                                                 </div>
                                             </div>
